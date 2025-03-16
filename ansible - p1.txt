@@ -1,0 +1,186 @@
+===========[ANSIBLE P1 CONF TOOL]=============
+
+
+* History of configuration automation 
+* DevOps periodic table
+* Ansible mech
+* Important files [ inventory file /etc/ansible/hosts.txt, Configuration file /etc/ansible/ansible.cfg]
+* Ansible installation - pip method / normal method
+* Pageant.exe
+* adhoc
+
+
+ansible was introduce who produce redhat
+ansible was one of the power full tool in devops
+
+chef 	-2005		-pull 		mech		agent based
+pup		-2008		-pull 	    	    "			agent based
+ansible	-2010		-push 					agent less
+salt 		-2011	    	-push/pull				agent based agent less
+
+control node
+manage node
+
+push mechanism	-ansible
+pull mechanism
+
+agentbased 
+agent less		-ansible
+
+
+Two important file we have there are:-
+
+inv file---> /etc/ansible/host			slave.txt	
+cfg file--> /etc/ansible/ansible.cfg	vi ansible.cfg	https://github.com/ansible/ansible/blob/stable-2.9/examples/ansible.cfg
+
+push mechanism	- you need to give collection of slave ip's to master machine
+pull mechanism	- you need to give master machines ip's to all slave machine 
+There are two types of installation methods we have
+
+pip methods  	= 	disadvantages of pip methods is  there is no inv file and conf file defaultly
+				we have to create the file (python package manager) "preferred installer program".
+normal methods	=	!
+
+
+
+
+========================================
+shell script
+
+#! /bin/bash
+sudo yum install python-pip -y
+pip install ansible
+
+ansible all -i slave.txt -m ping
+ansible all -i slave.txt -a "lsblk"
+
+ansible all -i slave.txt -m yum -a "name=httpd state= ? "
+
+=================================
+
+before 2005 we have to configure manualy
+
+after 2005 we have use chef tool and configure - automation cfg
+
+
+chef 	-2005		-pull 		mech		agent based
+pup		-2008		-pull 	    	    "			agent based
+ansible	-2010		-push 					agent less
+salt 		-2011	    	-push/pull				agent based agent based
+
+
+Restriction in ansible
+-----------------------------
+
+Windows can't ba a master
+Ansible should'n be executed as root user
+majorly real time slave os will be ubuntu and redhat 
+
+
+PIP
+----
+
+#yum install python-pip -y
+#pip install ansible
+
+creation hosts and conf files
+inventory file /etc/ansible/hosts.txt, Configuration file /etc/ansible/ansible.cfg
+
+ec2-user
+vi hosts.txt - inventory file
+vi ansible.cfg - configuration file
+
+ansible.cfg exaple github
+
+https://github.com/ansible/ansible/blob/devel/examples/ansible.cfg
+https://github.com/ansible/ansible/blob/stable-2.9/examples/ansible.cfg
+
+#ansible all -i hosts.txt -m ping
+/key
+#host_key_checking = False
+
+checking uptime
+-a = aruguments
+
+ansible all -i hosts.txt -a "uptime"
+ansible all -i hosts.txt -a "uname"
+ansible all -i hosts.txt -a "uname -a"
+ansible all -i hosts.txt -a "df -h"
+ansible 172.31.90.85 -i hosts.txt -a "df -h"
+ansible 44.204.168.223 -i hosts.txt -a "df -h"
+
+grouping
+
+[hdfc]
+172.31.90.85
+[yono]
+44.204.168.223
+172.31.86.15
+
+ansible yono -i hosts.txt -m ping
+ansible yono -i hosts.txt -a "df -h"
+
+
+edit this for avoid " hosts.txt "
+vi ansible.cfg
+#inventory      = /etc/ansible/hosts
+inventory      = /home/ec2-user/hosts.txt
+
+#ansible all -m ping
+
+
+
+===========================
+name:httpd
+
+state: 
+install		-	present /latest	
+uninstall		- 	absent
+start			-	started
+stop			-	stopped
+restart		-	restarted
+
+-b become root
+
+httpd installation through ansible ad hoc commands
+
+#ansible all -m yum -a "name=httpd state=present"
+#ansible all -m yum -a "name=httpd state=present" -b
+
+how to start httpd
+
+#ansible all -m service -a "name=httpd state=started" -b
+
+copy
+
+source destination
+vi index.html
+hi i have hosted my content to slave machines
+
+#ansible all -m copy -a "src=index.html dest=/var/www/html" -b
+
+
+***** adhoc commands links
+
+https://docs.ansible.com/ansible/latest/command_guide/intro_adhoc.html
+
+single line command are known as ad hoc
+mulitple command known as playbook
+
+
+
+
+yum install httpd
+service httpd start
+
+
+
+
+
+
+
+
+
+
+
+

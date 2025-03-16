@@ -1,0 +1,231 @@
+===========[ANSIBLE P3 CONF TOOL]=============
+
+
+Jenkins installations:-
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+     - name: Add repository
+       yum_repository:
+         name: jenkins
+         description: Add repository
+         baseurl: https://pkg.jenkins.io/redhat-stable
+         gpgkey: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+     - name: updating repositorys
+       yum:
+         name: '*' #wildcard
+         state: latest
+
+     - name: java installation
+       yum:
+         name: java-11-amazon-corretto
+         state: present
+
+
+     - name: installing jenkins
+       yum:
+         name: jenkins
+         state: present
+
+     - name: starting jenkins
+       service:
+         name: jenkins
+         state: started
+
+============================================
+
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/get_url_module.html
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/unarchive_module.html#examples
+./startup.sh
+sh startup.sh
+
+
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+     - name: downloading tomcat
+       get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.0.22/bin/apache-tomcat-10.0.22.tar.gz
+        dest: /opt
+
+     - name: extracting tomcat
+       unarchive:
+        src: /opt/apache-tomcat-10.0.22.tar.gz
+        dest: /opt
+        remote_src: yes
+
+     - name: installing java
+       yum:
+         name: java-11-amazon-corretto
+         state: present
+
+     - name: downloading sample.war
+       get_url:
+        url: https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war
+        dest: /opt/apache-tomcat-10.0.22/webapps
+
+     - name: fetching server.xml from remote to master
+       fetch:
+          src: /opt/apache-tomcat-10.0.22/conf/server.xml
+          dest: /home/ec2-user/server.xml.j2
+          flat: yes
+       tags:
+         - fetch
+
+     - name: Template a file to /etc/file.conf
+       template:
+         src: /home/ec2-user/server.xml.j2
+         dest: /opt/apache-tomcat-10.0.22/conf/server.xml
+
+   
+     - name: starting tomcat
+       shell: nohup /opt/apache-tomcat-10.0.22/bin/shutdown.sh &
+      
+
+     - name: starting tomcat
+       shell: nohup /opt/apache-tomcat-10.0.22/bin/startup.sh &
+       
+ ansible-playbook tomcat.yml  --skip-tags fetch
+
+==================================================================
+       
+there are two type of installations?
+
+repo installations
+boot starp installations
+
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/get_url_module.html
+
+
+
+
+ssh ec2-user@0.0.0.0
+
+local - master
+remote_src - slave
+
+yaml command
+get url - download tomcat
+unarchive - tomcat.tar
+#wget - sample.war
+#java installation
+#.sh - shell module
+#cd /opt/apache-tomcat-9.0.76/conf
+vi server.xml
+#ansible-playbook tomcat.yml --tags start
+       tags:
+         - start
+#scp ec2-user@0.0.0.0:/opt/apache-tomcat-10.0.20/conf/server.xml  .
+#ansible-galaxy init apache
+#yum install tree -y
+#tree apache
+#ansible-play tomcat  --skip-tags fetch
+
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+    - name: wget tomcat
+      ansible.builtin.get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.76/bin/apache-tomcat-9.0.76.tar.gz
+        dest: /opt
+    - name: untar tomcat
+      ansible.builtin.unarchive:
+        src: /opt/apache-tomcat-9.0.76.tar.gz
+        dest: /opt
+        remote_src: yes
+    - name: fetching server.xml from remote to master
+      fetch:
+         src: /opt/apache-tomcat-9.0.76/conf/server.xml
+         dest: /home/ec2-user/server.xml.j2
+         flat: yes
+      tags:
+         - fetch
+    - name: java installations
+      yum:
+        name: java-11
+        state: present
+      tags:
+         - fetch
+    - name: Template a file to /etc/file.conf
+      ansible.builtin.template:
+        src: /home/ec2-user/server.xml.j2
+        dest: /opt/apache-tomcat-9.0.76/conf/server.xml
+    - name: wget tomcat
+      ansible.builtin.get_url:
+        url: https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war
+        dest: /opt/apache-tomcat-9.0.76/webapps
+    - name: Execute the command in remote shell
+      ansible.builtin.shell: nohup sh /opt/apache-tomcat-9.0.76/bin/shutdown.sh &
+    - name: Execute the command in remote shell
+      ansible.builtin.shell: nohup sh /opt/apache-tomcat-9.0.76/bin/startup.sh &
+
+=======================================================================================
+
+what is mean by roles?
+
+
+
+ansible-galaxy init {create a directory}
+sudo yum install tree -y
+tree apache
+apache
+├── README.md
+├── defaults
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars
+    └── main.yml
+cd /apache/tasks
+cd /apache/files
+vi httpd
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  roles:
+    - apache
+    - tomcat
+    - httpd
+    - ngnix
+anisble-playbook httpd
+
+=================================================================
+vault
+-------
+
+ansible-vault encrypt httpd.yml
+create a password
+
+AES256 althorithum 
+ansible-vault view httpd.yml
+give vault password
+ansible-vault edit jenkins.yml
+
+playbook - run
+ansible-playbook jenkins.yml --ask-vault-password
+
+ansible-vault rekey jenkins.yml
+ansible-vault decrypt jenkins.yml
+
+
+
+
+
+
+

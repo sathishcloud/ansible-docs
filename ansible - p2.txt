@@ -1,0 +1,266 @@
+===================================================
+------------------------------->ANSIBLE P2<-----------------------------------
+===================================================
+
+state	
+=====
+install	-- present/latest
+uninstall	-- absent
+start		-- started
+stop		-- stoped
+restart	-- restarted
+become	-- -b
+
+#yum install python-pip -y
+#pip install ansible
+
+==================================================
+
+Ad hoc commands
+3 commands
+Playbook --> multiple adhoc cmds --> .yml
+
+What is YAML Ain't Markup Language?
+
+Its initial name was intended as a tongue-in-cheek to the technology landscape, referencing its purpose as a markup language with the yet another construct, but it was then repurposed as YAML Ain't Markup Language, a recursive acronym, to distinguish its purpose as data-oriented, rather than document markup.
+
+Important:-
+
+yaml: mostly use configuration files
+
+extenstions = .yml or .yaml
+
+indentation = space
+
+
+
+
+=================================================
+
+Playbook:-
+-------------
+VSC
+
+how to install apache?
+
+apache.yml
+
+#anisble all -i hosts.txt -m ping
+#anisble all -m ping
+#ansible all -m yum -a "name:httpd state:present"
+# - space
+
+[ ----------- example 001:- -------- ]
+
+- hosts: all  					[ hosts ip , group name , all]
+  remote_user: ec2-user 		[ remote users name]
+  become: yes				[ if you need root permissions give - yes ]
+  tasks:						[ give missions what to do like:- task]	
+      - name: 					[ give a message what task you gave ]
+        yum:  					[ modules ]
+	   name:					[ -a arguments ]
+           state:					[ present,absent,started,stoped,restarted ]
+
+[ ------------- examples 002:- ----------- ]
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  #become_user: specify username
+  tasks:
+      - name: installing apache
+        yum: 
+           name: httpd
+           state: present
+      - name: starting apache
+        service:
+           name: httpd
+           state: started
+      - name: copy code
+        copy:
+           src: index.html
+           dest: /var/www/html      
+
+#ansible-playbook apache.yml
+#idempotent ansible = command are not run unless needed
+
+change vi index.html [ hii i have been changed ] 
+
+[ ------ example003:- ------- ]
+
+#python ruby groovy
+
+vi package.yml
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+    - name: python installations
+      yum:
+       name: python
+       state: present
+    - name: ruby installations
+      yum:
+       name: ruby
+       state: present
+    - name: ipl
+      yum:
+       name: ipl
+       state: present
+
+# ansible-playbook sample.yml --syntax-check
+
+[ -------------- example 004:- ------------ ]
+
+# if any task will be give you error ansible won't be go next
+# its a ansible nature but we can change
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+    - name: ipl
+      yum:
+       name: ipl
+       state: present
+    - name: python installations
+      yum:
+       name: python
+       state: present
+    - name: ruby installations
+      yum:
+       name: ruby
+       state: present
+
+[ ---------------- example 005:- ------------- ]
+
+#code minimise
+#iteration doing process again and again ( loop )
+
+key word " {{ item }} "
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+    - name: loop consept
+      yum:
+       name: "{{ item }}"
+       state: present
+
+      loop:
+            - python
+            - ruby
+            - ipl
+    - name: httpd starting
+      service:
+       name: httpd
+       state: started
+
+key word " {{ list got packages }} "
+
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+    - name: loop consept
+      yum:
+       name: "{{ list got packges }}"
+       state: present
+
+      loop:
+            - python
+            - ruby
+            - ipl
+    - name: httpd starting
+      service:
+       name: httpd
+       state: started
+
+
+[ --------------- examples 006 :- ------------------ ]
+
+Is this possible we create instance of cloud ?
+
+https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_instance_module.html#examples
+
+ansible-galaxy collection install amazon.aws
+
+
+- name: start an instance with a public IP address
+  amazon.aws.ec2_instance:
+    name: "public-compute-instance"
+    key_name: "prod-ssh-key"
+    vpc_subnet_id: subnet-5ca1ab1e
+    instance_type: c5.large
+    security_group: default
+    network:
+      assign_public_ip: true
+    image_id: ami-123456
+    tags:
+      Environment: Testing
+
+#Mine
+
+- hosts: localhost
+  tasks: 
+
+- hosts: localhost
+  tasks:
+
+    - name: start an instance with a public IP address
+      amazon.aws.ec2_instance:
+        name: "ans-instance"
+        key_name: "linux 29-06-2023"
+        region: ap-southeast-2
+        vpc_subnet_id: subnet-0da83e587c22ef5be
+        instance_type: t2.micro
+        security_group: default
+        network:
+          assign_public_ip: true
+        image_id: ami-06cd706b6bacee637
+        tags:
+          Environment: Testing
+
+sudo pip install boto 
+sudo pip install boto3
+
+
+=====================================================
+
+sudo yum search openjdk
+sudo yum search java-11
+java 11 amazon linux
+sudo yum install java-11-amazon-corretto
+
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html#examples
+https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/amazon-linux-install.html
+
+
+    
+
+
+multiple adhoc cam or like playbook
+
+
+ansible all -m yum -a "name=httpd state=present" -b
+
+ansible all -m service -a "name=httpd state=started" -b
+
+ansible all -m copy -a "src=index.html dest=/var/www/html" -b
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
